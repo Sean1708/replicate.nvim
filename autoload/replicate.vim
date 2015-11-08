@@ -16,8 +16,13 @@ function replicate#REPL(index)
   endif
 
   " Expand out any instances of the current filename.
-  " TODO: Maybe save to a temporary file before running?
-  let l:cmd = substitute(l:cmd, '%', expand('%'), 'g')
+  if l:cmd =~? '%'
+    " Write to temporary file (in case it's an unnamed script or has been updated since last write),
+    " and use that file instead.
+    let l:tempfile = tempname()
+    execute 'write ' . l:tempfile
+    let l:cmd = substitute(l:cmd, '%', l:tempfile, 'g')
+  endif
 
   if g:replicate_split_window == 1
     if winwidth(0)/2 < g:replicate_min_winwidth

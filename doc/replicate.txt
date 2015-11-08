@@ -1,0 +1,107 @@
+*replicate* *replicate.txt* simple interaction with Neovim's terminal buffers
+>
+                            _ _           _
+             _ __ ___ _ __ | (_) ___ __ _| |_ ___
+            | '__/ _ \ '_ \| | |/ __/ _` | __/ _ \
+            | | |  __/ |_) | | | (_| (_| | ||  __/
+            |_|  \___| .__/|_|_|\___\__,_|\__\___|
+                     |_|
+<
+
+==============================================================================
+CONTENTS                                                  *replicate-contents*
+
+    1. Usage .................. |replicate-usage|
+    2. Functions .............. |replicate-functions|
+    3. Commands ............... |replicate-commands|
+    4. Configuration .......... |replicate-configuration|
+
+==============================================================================
+Section 1: Usage                                             *replicate-usage*
+
+replicate aims to create a language agnostic interface to run a language's
+REPL in an |nvim-terminal-emulator| but to do this it must put some onus on
+the user to specify the correct command line program for running a REPL in the
+language of their choice.
+
+To use replicate you must first specify the command line program which runs
+your language's REPL of choice. You do this by setting the buffer local
+variable b:replicate (usually in the after-ftplugin directory, see
+|ftplugin-overrule|) in one of two ways.
+
+1. If you only want to run the REPL then you simply set it to the name of the
+   REPL program: >
+        let b:replicate = 'python3'
+<
+2. If you want to be able to load a script before dropping into the REPL
+   (assuming your REPL supports this) you set it to a list containing the two
+   ways of running the REPL. Any place where a % occurs in the command it will
+   be replaced by the name of the current file: >
+        let b:replicate = ['python3', 'python3 -i %']
+<
+Then whenever you want to load the REPL you simply run >
+    :REPL
+<to load the current file first (if the functionality is available) or >
+    :REPL!
+<to just run the REPL without first loading the file.
+
+By default replicate can handle the following languages:
+
+1. Haskell
+2. Javascript
+3. Julia
+4. Lua
+5. Python
+6. Ruby
+
+If the buffer does not have b:replicate, replicate will open a standard
+terminal buffer.
+
+==============================================================================
+Section 2: Functions                                     *replicate-functions*
+
+                                                            *replicate#REPL()*
+>
+    :call replicate#REPL(REPL)
+>
+This function can be used to invoke REPL in the same way that >
+    :REPL
+<and >
+    :REPL!
+<do. If the argument contains % characters then these will be replaced by the
+name of the current buffer (much like |expand()| does). For example
+>
+    :call replicate#REPL('python3 -i %')
+<
+will load the run the current buffer in Python and the drop you in to the
+interpreter.
+
+==============================================================================
+Section 3: Commands                                       *replicate-commands*
+
+                                                                       *:REPL*
+>
+    :REPL
+<
+This command will load the REPL after first running the code in the current
+buffer (if this functionality if available).
+
+                                                                      *:REPL!*
+>
+    :REPL!
+<
+This command will load the REPL without running any code first.
+
+==============================================================================
+Section 4: Configuration                             *replicate-configuration*
+
+                                                    *g:replicate_min_winwidth*
+
+By default replicate will open a vertical split if the resulting window would
+be greater than 80 columns, otherwise it opens a horizontal split. Changing
+this variable changes the minimum window width that is deemed acceptable.
+
+                                                    *g:replicate_split_window*
+
+By default replicate opens a split window, setting this to 0 prevents that
+from happening.
